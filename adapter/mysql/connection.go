@@ -11,7 +11,7 @@ import (
 )
 
 // const dsnFormat = "%s:%s@tcp(%s:%s)/%s?parseTime=%s&loc=%s&charset=%s&autocommit=%s" //e.g. ==> user:pass@tcp(127.0.0.1:3306)/dbname?parseTime=True&loc=Asia%2FJakarta&charset=utf8&autocommit=false
-const dsnFormat = "%s:%s@tcp(%s:%s)/%s?parseTime=%s&charset=%s" //e.g. ==> user:pass@tcp(127.0.0.1:3306)/dbname?parseTime=True&loc=Asia%2FJakarta&charset=utf8&autocommit=false
+const dsnFormat = "%s:%s@tcp(%s:%s)/%s?parseTime=%s&charset=%s" //e.g. ==> user:pass@tcp(127.0.0.1:3306)/dbname?parseTime=True&charset=utf8
 
 func NewConnection(cfg *config.Config) (*sql.DB, error) {
 	return connectionBegin(cfg)
