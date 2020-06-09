@@ -1,4 +1,4 @@
-package usersEntity
+package account
 
 import "time"
 
@@ -9,6 +9,7 @@ type Users struct {
 	Surename        string `json:"surename"`
 	Email           string `json:"email"`
 	Phone           string `json:"phone"`
+	Role            string `json:"role"`
 	Timestamp
 }
 

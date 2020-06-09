@@ -8,18 +8,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wahyurudiyan/authentication/entity/usersEntity"
+	"github.com/wahyurudiyan/authentication/entity/account"
 )
 
 type repository struct {
 	conn *sql.DB
 }
 type Repository interface {
-	CreateAcccount(ctx context.Context, user []*usersEntity.Users) error
-	GetAccountByID(ctx context.Context, id []string) ([]*usersEntity.Users, error)
-	GetAccountByUniqueID(ctx context.Context, uid []string) ([]*usersEntity.Users, error)
-	GetAllAcccount(ctx context.Context) ([]*usersEntity.Users, error)
-	UpdateAccount(ctx context.Context, uid []string, payload []*usersEntity.Users) error
+	CreateAcccount(ctx context.Context, user []*account.Users) error
+	GetAccountByID(ctx context.Context, id []string) ([]*account.Users, error)
+	GetAccountByUniqueID(ctx context.Context, uid []string) ([]*account.Users, error)
+	GetAllAcccount(ctx context.Context) ([]*account.Users, error)
+	UpdateAccount(ctx context.Context, uid []string, payload []*account.Users) error
 	DeleteAccount(ctx context.Context, uid []string) error
 }
 
@@ -35,7 +35,7 @@ func isDeleted(flag time.Time) bool {
 	return true
 }
 
-func (r *repository) CreateAcccount(ctx context.Context, user []*usersEntity.Users) error {
+func (r *repository) CreateAcccount(ctx context.Context, user []*account.Users) error {
 	var args []string
 	for _, v := range user {
 		arg := fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', '%v', '%v')",
@@ -55,11 +55,11 @@ func (r *repository) CreateAcccount(ctx context.Context, user []*usersEntity.Use
 	return nil
 }
 
-func (r *repository) GetAccountByID(ctx context.Context, id []string) ([]*usersEntity.Users, error) {
-	var results []*usersEntity.Users
+func (r *repository) GetAccountByID(ctx context.Context, id []string) ([]*account.Users, error) {
+	var results []*account.Users
 
 	for _, v := range id {
-		var row usersEntity.Users
+		var row account.Users
 		r := r.conn.QueryRowContext(ctx, "SELECT * FROM users WHERE id=?", v)
 		err := r.Scan(
 			&row.ID,
@@ -84,11 +84,11 @@ func (r *repository) GetAccountByID(ctx context.Context, id []string) ([]*usersE
 	return results, nil
 }
 
-func (r *repository) GetAccountByUniqueID(ctx context.Context, uid []string) ([]*usersEntity.Users, error) {
-	var results []*usersEntity.Users
+func (r *repository) GetAccountByUniqueID(ctx context.Context, uid []string) ([]*account.Users, error) {
+	var results []*account.Users
 
 	for _, v := range uid {
-		var row usersEntity.Users
+		var row account.Users
 		r := r.conn.QueryRowContext(ctx, "SELECT * FROM users WHERE account_unique_id=?", v)
 		err := r.Scan(
 			&row.ID,
@@ -113,8 +113,8 @@ func (r *repository) GetAccountByUniqueID(ctx context.Context, uid []string) ([]
 	return results, nil
 }
 
-func (r *repository) GetAllAcccount(ctx context.Context) ([]*usersEntity.Users, error) {
-	var results []*usersEntity.Users
+func (r *repository) GetAllAcccount(ctx context.Context) ([]*account.Users, error) {
+	var results []*account.Users
 
 	rows, err := r.conn.QueryContext(ctx, "SELECT * FROM users")
 	if err != nil {
@@ -128,7 +128,7 @@ func (r *repository) GetAllAcccount(ctx context.Context) ([]*usersEntity.Users, 
 	}
 
 	for rows.Next() {
-		var row usersEntity.Users
+		var row account.Users
 		err := rows.Scan(
 			&row.ID,
 			&row.AccountUniqueID,
@@ -154,7 +154,7 @@ func (r *repository) GetAllAcccount(ctx context.Context) ([]*usersEntity.Users, 
 	return results, nil
 }
 
-func (r *repository) UpdateAccount(ctx context.Context, uid []string, payload []*usersEntity.Users) error {
+func (r *repository) UpdateAccount(ctx context.Context, uid []string, payload []*account.Users) error {
 	for i, v := range payload {
 		_, err := r.conn.ExecContext(ctx, "UPDATE users SET firstname=?, surename=?, email=?, phone=?, updated_at=? WHERE account_unique_id=?",
 			v.Firstname, v.Surename, v.Email, v.Phone, time.Now().UTC(), uid[i])

@@ -1,17 +1,17 @@
 package http
 
 import (
-	"github.com/wahyurudiyan/authentication/entity/usersEntity"
+	"github.com/wahyurudiyan/authentication/entity/account"
 )
 
 type Request struct {
 	ID    []string             `json:"id"`
 	Token string               `json:"token"`
-	Data  []*usersEntity.Users `json:"data"`
+	Data  []*account.Users `json:"data"`
 }
 
 type Response struct {
 	StatusCode int                  `json:"status_code"`
 	Message    string               `json:"message"`
-	Data       []*usersEntity.Users `json:"data"`
+	Data       []*account.Users `json:"data"`
 }
