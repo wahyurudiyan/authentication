@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/wahyurudiyan/authentication/entity/account"
 )
 
@@ -35,19 +37,39 @@ func isDeleted(flag time.Time) bool {
 	return true
 }
 
+func hashingPassword(pass string) (string, error) {
+	password := []byte(pass)
+
+	bPass, err := bcrypt.GenerateFromPassword(password, 16)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bPass), nil
+}
+
 func (r *repository) CreateAcccount(ctx context.Context, user []*account.Users) error {
+	var arg string
 	var args []string
+
 	for _, v := range user {
-		arg := fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', '%v', '%v')",
-			v.AccountUniqueID, v.Firstname, v.Surename, v.Email, v.Phone, time.Now(), time.Now())
+		role := strings.Join(v.Role, ";")
+		hashPassword, _ := hashingPassword(v.Password)
+
+		arg = fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v')",
+			v.AccountUniqueID, v.Firstname, v.Surename, v.Username, hashPassword, v.Email, v.Phone, role, time.Now(), time.Now())
 		args = append(args, arg)
 	}
 
-	val := strings.Join(args, ", ")
-	log.Println(val)
-	stmt := fmt.Sprintf("INSERT INTO users (account_unique_id, firstname, surename, email, phone, created_at, updated_at) VALUE %s", val)
+	arg = strings.Join(args, ", ")
+	query := fmt.Sprintf("INSERT INTO users (account_unique_id, firstname, surename, username, password, email, phone, role, created_at, updated_at) VALUE %s", arg)
 
-	_, err := r.conn.ExecContext(ctx, stmt)
+	stmt, err := r.conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -66,8 +88,11 @@ func (r *repository) GetAccountByID(ctx context.Context, id []string) ([]*accoun
 			&row.AccountUniqueID,
 			&row.Firstname,
 			&row.Surename,
+			&row.Username,
+			&row.Password,
 			&row.Email,
 			&row.Phone,
+			&row.Role,
 			&row.CreatedAt,
 			&row.UpdatedAt,
 			&row.DeletedAt,
@@ -95,8 +120,11 @@ func (r *repository) GetAccountByUniqueID(ctx context.Context, uid []string) ([]
 			&row.AccountUniqueID,
 			&row.Firstname,
 			&row.Surename,
+			&row.Username,
+			&row.Password,
 			&row.Email,
 			&row.Phone,
+			&row.Role,
 			&row.CreatedAt,
 			&row.UpdatedAt,
 			&row.DeletedAt,
@@ -134,8 +162,11 @@ func (r *repository) GetAllAcccount(ctx context.Context) ([]*account.Users, erro
 			&row.AccountUniqueID,
 			&row.Firstname,
 			&row.Surename,
+			&row.Username,
+			&row.Password,
 			&row.Email,
 			&row.Phone,
+			&row.Role,
 			&row.CreatedAt,
 			&row.UpdatedAt,
 			&row.DeletedAt,
@@ -156,8 +187,9 @@ func (r *repository) GetAllAcccount(ctx context.Context) ([]*account.Users, erro
 
 func (r *repository) UpdateAccount(ctx context.Context, uid []string, payload []*account.Users) error {
 	for i, v := range payload {
-		_, err := r.conn.ExecContext(ctx, "UPDATE users SET firstname=?, surename=?, email=?, phone=?, updated_at=? WHERE account_unique_id=?",
-			v.Firstname, v.Surename, v.Email, v.Phone, time.Now().UTC(), uid[i])
+		role := strings.Join(v.Role, ";")
+		_, err := r.conn.ExecContext(ctx, "UPDATE users SET firstname=?, surename=?, username=?, password=?, email=?, phone=?, role=?, updated_at=? WHERE account_unique_id=?",
+			v.Firstname, v.Surename, v.Username, v.Password, v.Email, v.Phone, role, time.Now().UTC(), uid[i])
 		if err != nil {
 			return err
 		}

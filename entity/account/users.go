@@ -3,13 +3,15 @@ package account
 import "time"
 
 type Users struct {
-	ID              uint   `json:"id"`
-	AccountUniqueID string `json:"account_unique_id"`
-	Firstname       string `json:"firstname"`
-	Surename        string `json:"surename"`
-	Email           string `json:"email"`
-	Phone           string `json:"phone"`
-	Role            string `json:"role"`
+	ID              uint     `json:"id"`
+	AccountUniqueID string   `json:"account_unique_id"`
+	Firstname       string   `json:"firstname"`
+	Surename        string   `json:"surename"`
+	Username        string   `json:"username"`
+	Password        string   `json:"password"`
+	Email           string   `json:"email"`
+	Phone           string   `json:"phone"`
+	Role            []string `json:"role"`
 	Timestamp
 }
 
